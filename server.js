@@ -4,6 +4,9 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 
 const adminRoutes = require('./routes/adminRoutes');
+const authRoutes = require('./routes/authRoutes');
+const studentRoutes = require('./routes/studentRoutes');
+const tutorRoutes = require('./routes/tutorRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,6 +24,9 @@ mongoose.connect(DB_URI)
   .catch(err => console.error('MongoDB connection error:', err));
 
 // Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/student', studentRoutes);
+app.use('/api/tutor', tutorRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Fallback for SPA/Frontend

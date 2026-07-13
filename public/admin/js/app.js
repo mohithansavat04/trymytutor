@@ -62,6 +62,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const menuBids = document.getElementById('menuBids');
   const menuDemos = document.getElementById('menuDemos');
   const menuSettings = document.getElementById('menuSettings');
+  const menuCalendars = document.getElementById('menuCalendars');
+  const menuFinance = document.getElementById('menuFinance');
+  const menuSupport = document.getElementById('menuSupport');
+  const menuReports = document.getElementById('menuReports');
+  const menuCms = document.getElementById('menuCms');
   
   const dashboardContent = document.getElementById('dashboardContent');
   const tutorApprovalsContent = document.getElementById('tutorApprovalsContent');
@@ -71,6 +76,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const bidsContent = document.getElementById('bidsContent');
   const demosContent = document.getElementById('demosContent');
   const settingsContent = document.getElementById('settingsContent');
+  const calendarsContent = document.getElementById('calendarsContent');
+  const financeContent = document.getElementById('financeContent');
+  const supportContent = document.getElementById('supportContent');
+  const reportsContent = document.getElementById('reportsContent');
+  const cmsContent = document.getElementById('cmsContent');
   const mainHeaderTitle = document.getElementById('mainHeaderTitle');
 
   const activeMenuClass = ['bg-brand/10', 'text-brand'];
@@ -85,6 +95,11 @@ document.addEventListener('DOMContentLoaded', () => {
     { el: menuBids, content: bidsContent, title: 'Tutor Bids', name: 'bids' },
     { el: menuDemos, content: demosContent, title: 'Scheduled Demos', name: 'demos' },
     { el: menuSettings, content: settingsContent, title: 'Settings & Roles', name: 'settings' },
+    { el: menuCalendars, content: calendarsContent, title: 'Calendars & Schedules', name: 'calendars' },
+    { el: menuFinance, content: financeContent, title: 'Finance & Wallets', name: 'finance' },
+    { el: menuSupport, content: supportContent, title: 'Support & Disputes', name: 'support' },
+    { el: menuReports, content: reportsContent, title: 'Reports & Analytics', name: 'reports' },
+    { el: menuCms, content: cmsContent, title: 'CMS Management', name: 'cms' },
   ];
 
   const switchMenu = (menuName, pushState = true) => {
@@ -131,6 +146,11 @@ document.addEventListener('DOMContentLoaded', () => {
   menuBids.addEventListener('click', (e) => { e.preventDefault(); switchMenu('bids'); fetchBids(); });
   menuDemos.addEventListener('click', (e) => { e.preventDefault(); switchMenu('demos'); fetchDemos(); });
   menuSettings.addEventListener('click', (e) => { e.preventDefault(); switchMenu('settings'); fetchSettings(); fetchTeamMembers(); });
+  menuCalendars.addEventListener('click', (e) => { e.preventDefault(); switchMenu('calendars'); fetchCalendars(); });
+  menuFinance.addEventListener('click', (e) => { e.preventDefault(); switchMenu('finance'); fetchFinance(); });
+  menuSupport.addEventListener('click', (e) => { e.preventDefault(); switchMenu('support'); fetchSupport(); });
+  menuReports.addEventListener('click', (e) => { e.preventDefault(); switchMenu('reports'); });
+  menuCms.addEventListener('click', (e) => { e.preventDefault(); switchMenu('cms'); fetchCms(); });
 
   window.addEventListener('popstate', (e) => {
     if (e.state && e.state.menu) {
@@ -151,6 +171,11 @@ document.addEventListener('DOMContentLoaded', () => {
       else if (path.includes('/bids'))        { switchMenu('bids', false);        fetchBids(); }
       else if (path.includes('/demos'))       { switchMenu('demos', false);       fetchDemos(); }
       else if (path.includes('/settings'))    { switchMenu('settings', false);    fetchSettings(); fetchTeamMembers(); }
+      else if (path.includes('/calendars'))   { switchMenu('calendars', false);   if(typeof fetchCalendars === 'function') fetchCalendars(); }
+      else if (path.includes('/finance'))     { switchMenu('finance', false);     if(typeof fetchFinance === 'function') fetchFinance(); }
+      else if (path.includes('/support'))     { switchMenu('support', false);     if(typeof fetchSupport === 'function') fetchSupport(); }
+      else if (path.includes('/reports'))     { switchMenu('reports', false); }
+      else if (path.includes('/cms'))         { switchMenu('cms', false);         if(typeof fetchCms === 'function') fetchCms(); }
       else if (path.includes('/dashboard'))   { switchMenu('dashboard', false); }
       else                                    { switchMenu('users', false);       fetchStudents(); }
     }, 0);
@@ -167,35 +192,52 @@ document.addEventListener('DOMContentLoaded', () => {
   
   const applyAccessControl = () => {
     const role = getRole();
-    const permissions = getPermissions();
     if (!role) return;
 
-    // By default show all
-    [menuTutorApprovals, menuMcqs, menuRequirements, menuBids, menuDemos, menuSettings].forEach(m => {
-      if (m && m.parentElement) m.parentElement.style.display = 'block';
+    // Define all menu elements (they might not have IDs, we need to query them by href if possible, or hide their list item parents)
+    // The previous implementation used some defined IDs. We'll find all sidebar links and control their display.
+    const sidebarLinks = document.querySelectorAll('#sidebar nav a');
+    
+    // First, hide everything except Dashboard
+    sidebarLinks.forEach(link => {
+      const href = link.getAttribute('href');
+      if (href && href !== '#dashboard' && href !== '#') {
+        link.parentElement.style.display = 'none';
+      }
     });
 
     const superAdminSectionEls = document.querySelectorAll('.mt-8.mb-4.px-4');
     const superAdminLabel = Array.from(superAdminSectionEls).find(el => el.textContent.includes('Super Admin'));
+    if (superAdminLabel) superAdminLabel.style.display = 'none';
 
     if (role === 'Super Admin') {
       if (superAdminLabel) superAdminLabel.style.display = 'block';
-      return; // Super Admin sees everything
+      sidebarLinks.forEach(link => { link.parentElement.style.display = 'block'; });
+      return;
     }
 
-    if (superAdminLabel) superAdminLabel.style.display = 'none';
-
-    // Apply granular permissions
-    if (!permissions.includes('view_users')) {
-      // the students menu doesn't have a distinct ID in JS for the sidebar, but we can hide the first menu item
-      // Actually we didn't add an ID for Students menu. Wait, let's just let it fall back.
+    if (role === 'Finance Manager') {
+      // Finance Manager only sees Finance & Wallets
+      sidebarLinks.forEach(link => {
+        if (link.getAttribute('href') === '#finance') link.parentElement.style.display = 'block';
+      });
+      return;
     }
-    if (!permissions.includes('view_tutors') && menuTutorApprovals) menuTutorApprovals.parentElement.style.display = 'none';
-    if (!permissions.includes('view_mcqs') && menuMcqs) menuMcqs.parentElement.style.display = 'none';
-    if (!permissions.includes('view_requirements') && menuRequirements) menuRequirements.parentElement.style.display = 'none';
-    if (!permissions.includes('view_bids') && menuBids) menuBids.parentElement.style.display = 'none';
-    if (!permissions.includes('view_demos') && menuDemos) menuDemos.parentElement.style.display = 'none';
-    if (!permissions.includes('manage_settings') && menuSettings) menuSettings.parentElement.style.display = 'none';
+
+    if (role === 'Admin') {
+      // Admin: users, tutors, CMS, calendars, payments(finance), reports, leads(requirements, bids). 
+      // NO Settings, NO Support
+      const allowedPaths = ['#users', '#tutors', '#cms', '#calendars', '#finance', '#reports', '#requirements', '#bids'];
+      sidebarLinks.forEach(link => {
+        if (allowedPaths.includes(link.getAttribute('href'))) {
+          link.parentElement.style.display = 'block';
+        }
+      });
+      return;
+    }
+
+    // Fallback based on permissions if needed
+    // ...
   };
 
   const checkAuth = () => {
@@ -1704,5 +1746,117 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // ==========================================
+  // --- New Dynamic Modules ---
+  // ==========================================
+
+  window.fetchCalendars = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/schedules`, {
+        headers: { 'Authorization': `Bearer ${getToken()}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const container = document.getElementById('calendarsContent').querySelector('.text-center');
+        if (data.length === 0) {
+          container.innerHTML = '<p class="text-slate-500">No schedules found.</p>';
+        } else {
+          let html = `<table class="w-full text-left mt-4"><thead class="text-xs uppercase bg-slate-800 text-slate-400"><tr><th class="px-4 py-3">Date</th><th class="px-4 py-3">Time</th><th class="px-4 py-3">Status</th></tr></thead><tbody class="divide-y divide-slate-800">`;
+          data.forEach(s => {
+            html += `<tr class="hover:bg-slate-800/50"><td class="px-4 py-3 text-sm text-white">${new Date(s.date).toLocaleDateString()}</td><td class="px-4 py-3 text-sm text-slate-300">${s.startTime} - ${s.endTime}</td><td class="px-4 py-3 text-sm"><span class="px-2 py-1 bg-brand/10 text-brand rounded">${s.status}</span></td></tr>`;
+          });
+          html += `</tbody></table>`;
+          container.innerHTML = html;
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch schedules', err);
+    }
+  };
+
+  window.fetchFinance = async () => {
+    try {
+      const txRes = await fetch(`${API_BASE}/transactions`, { headers: { 'Authorization': `Bearer ${getToken()}` } });
+      const payoutRes = await fetch(`${API_BASE}/payouts`, { headers: { 'Authorization': `Bearer ${getToken()}` } });
+      
+      if (txRes.ok && payoutRes.ok) {
+        const txData = await txRes.json();
+        const payoutData = await payoutRes.json();
+        
+        const container = document.getElementById('financeContent').querySelector('.border-dashed');
+        if (txData.length === 0 && payoutData.length === 0) {
+          container.innerHTML = '<p class="text-slate-500">No transactions or payouts found.</p>';
+        } else {
+          let html = `<h3 class="text-lg font-bold text-white mb-2">Transactions</h3><table class="w-full text-left mb-8"><thead class="text-xs uppercase bg-slate-800 text-slate-400"><tr><th class="px-4 py-3">Amount</th><th class="px-4 py-3">Type</th><th class="px-4 py-3">Purpose</th><th class="px-4 py-3">Status</th></tr></thead><tbody class="divide-y divide-slate-800">`;
+          txData.forEach(tx => {
+            html += `<tr class="hover:bg-slate-800/50"><td class="px-4 py-3 text-sm text-white">₹${tx.amount}</td><td class="px-4 py-3 text-sm text-slate-300">${tx.type}</td><td class="px-4 py-3 text-sm text-slate-300">${tx.purpose}</td><td class="px-4 py-3 text-sm"><span class="px-2 py-1 bg-green-500/10 text-green-400 rounded">${tx.status}</span></td></tr>`;
+          });
+          html += `</tbody></table>`;
+          
+          html += `<h3 class="text-lg font-bold text-white mb-2">Payout Requests</h3><table class="w-full text-left"><thead class="text-xs uppercase bg-slate-800 text-slate-400"><tr><th class="px-4 py-3">Amount</th><th class="px-4 py-3">Bank Details</th><th class="px-4 py-3">Status</th></tr></thead><tbody class="divide-y divide-slate-800">`;
+          payoutData.forEach(p => {
+            html += `<tr class="hover:bg-slate-800/50"><td class="px-4 py-3 text-sm text-white">₹${p.amount}</td><td class="px-4 py-3 text-sm text-slate-400">${p.bankDetails ? p.bankDetails.bankName : 'N/A'}</td><td class="px-4 py-3 text-sm"><span class="px-2 py-1 bg-yellow-500/10 text-yellow-400 rounded">${p.status}</span></td></tr>`;
+          });
+          html += `</tbody></table>`;
+          
+          container.className = 'w-full';
+          container.innerHTML = html;
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch finance data', err);
+    }
+  };
+
+  window.fetchSupport = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/tickets`, {
+        headers: { 'Authorization': `Bearer ${getToken()}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const container = document.getElementById('supportContent').querySelector('.border-dashed');
+        if (data.length === 0) {
+          container.innerHTML = '<p class="text-slate-500">No support tickets found.</p>';
+        } else {
+          let html = `<table class="w-full text-left mt-4"><thead class="text-xs uppercase bg-slate-800 text-slate-400"><tr><th class="px-4 py-3">Subject</th><th class="px-4 py-3">Type</th><th class="px-4 py-3">Priority</th><th class="px-4 py-3">Status</th></tr></thead><tbody class="divide-y divide-slate-800">`;
+          data.forEach(t => {
+            html += `<tr class="hover:bg-slate-800/50"><td class="px-4 py-3 text-sm text-white font-medium">${t.subject}</td><td class="px-4 py-3 text-sm text-slate-300">${t.type}</td><td class="px-4 py-3 text-sm text-red-400">${t.priority}</td><td class="px-4 py-3 text-sm"><span class="px-2 py-1 bg-blue-500/10 text-blue-400 rounded">${t.status}</span></td></tr>`;
+          });
+          html += `</tbody></table>`;
+          container.className = 'w-full';
+          container.innerHTML = html;
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch support tickets', err);
+    }
+  };
+
+  window.fetchCms = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/cms`, {
+        headers: { 'Authorization': `Bearer ${getToken()}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const container = document.getElementById('cmsContent').querySelector('.border-dashed');
+        if (data.length === 0) {
+          container.innerHTML = '<p class="text-slate-500">No CMS pages found.</p>';
+        } else {
+          let html = `<table class="w-full text-left mt-4"><thead class="text-xs uppercase bg-slate-800 text-slate-400"><tr><th class="px-4 py-3">Title</th><th class="px-4 py-3">Slug</th><th class="px-4 py-3">Status</th></tr></thead><tbody class="divide-y divide-slate-800">`;
+          data.forEach(c => {
+            html += `<tr class="hover:bg-slate-800/50"><td class="px-4 py-3 text-sm text-white font-medium">${c.title}</td><td class="px-4 py-3 text-sm text-slate-400">/${c.slug}</td><td class="px-4 py-3 text-sm"><span class="px-2 py-1 bg-brand/10 text-brand rounded">${c.status}</span></td></tr>`;
+          });
+          html += `</tbody></table>`;
+          container.className = 'w-full';
+          container.innerHTML = html;
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch CMS pages', err);
+    }
+  };
 
 });

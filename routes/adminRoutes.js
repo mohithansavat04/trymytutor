@@ -55,4 +55,22 @@ router.post('/roles', adminController.protect, adminController.authorize('manage
 router.put('/roles/:id', adminController.protect, adminController.authorize('manage_team'), roleController.updateRole);
 router.delete('/roles/:id', adminController.protect, adminController.authorize('manage_team'), roleController.deleteRole);
 
+// Transactions, Payouts, Tickets, Schedules, CMS
+router.get('/transactions', adminController.protect, adminController.getAllTransactions);
+router.post('/transactions', adminController.protect, adminController.createTransaction);
+
+router.get('/payouts', adminController.protect, adminController.getAllPayouts);
+router.put('/payouts/:id', adminController.protect, adminController.updatePayoutStatus);
+
+router.get('/tickets', adminController.protect, adminController.getAllTickets);
+router.put('/tickets/:id', adminController.protect, adminController.updateTicketStatus);
+
+router.get('/schedules', adminController.protect, adminController.getAllSchedules);
+router.put('/schedules/:id', adminController.protect, adminController.updateScheduleStatus);
+
+router.get('/cms', adminController.protect, adminController.getAllCmsPages);
+router.post('/cms', adminController.protect, adminController.createCmsPage);
+router.put('/cms/:id', adminController.protect, adminController.updateCmsPage);
+router.delete('/cms/:id', adminController.protect, adminController.deleteCmsPage);
+
 module.exports = router;

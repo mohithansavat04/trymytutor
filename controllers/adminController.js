@@ -5,6 +5,11 @@ const Requirement = require('../models/Requirement');
 const Bid = require('../models/Bid');
 const Demo = require('../models/Demo');
 const Setting = require('../models/Setting');
+const Transaction = require('../models/Transaction');
+const Payout = require('../models/Payout');
+const Ticket = require('../models/Ticket');
+const Schedule = require('../models/Schedule');
+const CmsPage = require('../models/CmsPage');
 const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey123';
@@ -22,6 +27,12 @@ exports.login = async (req, res) => {
     const isMatch = await admin.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    // Only allow Admin, Super Admin, and Finance Manager to login
+    const allowedRoles = ['Admin', 'Super Admin', 'Finance Manager'];
+    if (!allowedRoles.includes(admin.role)) {
+      return res.status(403).json({ message: 'Access Denied: Your role is not authorized to login to the admin panel' });
     }
     
     const roleDoc = await Role.findOne({ name: admin.role });
@@ -427,3 +438,123 @@ exports.updateTeamMemberRole = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+// --- New Modules (Transactions, Payouts, Tickets, Schedules, CMS) ---
+exports.getAllTransactions = async (req, res) => {
+  try {
+    const transactions = await Transaction.find().populate('user', 'name email role');
+    res.json(transactions);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.getAllPayouts = async (req, res) => {
+  try {
+    const payouts = await Payout.find().populate('tutor', 'name email');
+    res.json(payouts);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.getAllTickets = async (req, res) => {
+  try {
+    const tickets = await Ticket.find().populate('user', 'name email');
+    res.json(tickets);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.getAllSchedules = async (req, res) => {
+  try {
+    const schedules = await Schedule.find()
+      .populate('student', 'name email')
+      .populate('tutor', 'name email')
+      .populate('requirement', 'subject');
+    res.json(schedules);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.getAllCmsPages = async (req, res) => {
+  try {
+    const pages = await CmsPage.find();
+    res.json(pages);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// --- New CRUD Handlers ---
+
+exports.createTransaction = async (req, res) => {
+  try {
+    const transaction = await Transaction.create(req.body);
+    res.status(201).json(transaction);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+exports.updatePayoutStatus = async (req, res) => {
+  try {
+    const payout = await Payout.findByIdAndUpdate(req.params.id, { status: req.body.status }, { new: true });
+    if (!payout) return res.status(404).json({ message: 'Payout not found' });
+    res.json(payout);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.updateTicketStatus = async (req, res) => {
+  try {
+    const ticket = await Ticket.findByIdAndUpdate(req.params.id, { status: req.body.status }, { new: true });
+    if (!ticket) return res.status(404).json({ message: 'Ticket not found' });
+    res.json(ticket);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.updateScheduleStatus = async (req, res) => {
+  try {
+    const schedule = await Schedule.findByIdAndUpdate(req.params.id, { status: req.body.status }, { new: true });
+    if (!schedule) return res.status(404).json({ message: 'Schedule not found' });
+    res.json(schedule);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.createCmsPage = async (req, res) => {
+  try {
+    const page = await CmsPage.create(req.body);
+    res.status(201).json(page);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+exports.updateCmsPage = async (req, res) => {
+  try {
+    const page = await CmsPage.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!page) return res.status(404).json({ message: 'Page not found' });
+    res.json(page);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.deleteCmsPage = async (req, res) => {
+  try {
+    const page = await CmsPage.findByIdAndDelete(req.params.id);
+    if (!page) return res.status(404).json({ message: 'Page not found' });
+    res.json({ message: 'Page deleted' });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+

@@ -166,6 +166,15 @@
                 Demos
               </a>
             </li>
+            <li>
+              <a href="#" id="menuCalendars"
+                class="flex items-center px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl font-medium transition-all">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                Calendars
+              </a>
+            </li>
           </ul>
           
           <div class="mt-8 mb-4 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
@@ -176,6 +185,30 @@
               <a href="#" id="menuSettings" class="flex items-center px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl font-medium transition-all">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                 Settings & roles
+              </a>
+            </li>
+            <li>
+              <a href="#" id="menuFinance" class="flex items-center px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl font-medium transition-all">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Finance & Wallets
+              </a>
+            </li>
+            <li>
+              <a href="#" id="menuSupport" class="flex items-center px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl font-medium transition-all">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m-12.728 0a9 9 0 010-12.728m12.728 0l-12.728 12.728M8 12h8m-4-4v8"></path></svg>
+                Support System
+              </a>
+            </li>
+            <li>
+              <a href="#" id="menuReports" class="flex items-center px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl font-medium transition-all">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m4 2v-4m4 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                Reports
+              </a>
+            </li>
+            <li>
+              <a href="#" id="menuCms" class="flex items-center px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl font-medium transition-all">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                CMS Management
               </a>
             </li>
           </ul>
@@ -615,6 +648,61 @@
           </div>
 
         </div>
+
+        <!-- Calendars Content -->
+        <div id="calendarsContent" class="hidden w-full">
+          <div class="glass-card border border-brand-border rounded-2xl p-6">
+            <h3 class="text-xl font-bold mb-6 pb-6 border-b border-brand-border">Calendars & Schedules</h3>
+            <div class="text-slate-400 text-center py-10">Calendar view placeholder</div>
+          </div>
+        </div>
+
+        <!-- Finance Content -->
+        <div id="financeContent" class="hidden w-full">
+          <div class="glass-card border border-brand-border rounded-2xl p-6">
+            <h3 class="text-xl font-bold mb-6 pb-6 border-b border-brand-border">Finance & Wallets</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+              <div class="glass-card p-6 rounded-2xl border border-brand-border">
+                <p class="text-sm text-slate-400 font-medium mb-1">Total Revenue</p>
+                <h3 class="text-3xl font-bold">₹0</h3>
+              </div>
+              <div class="glass-card p-6 rounded-2xl border border-brand-border">
+                <p class="text-sm text-slate-400 font-medium mb-1">Pending Payouts</p>
+                <h3 class="text-3xl font-bold">₹0</h3>
+              </div>
+              <div class="glass-card p-6 rounded-2xl border border-brand-border">
+                <p class="text-sm text-slate-400 font-medium mb-1">Refunds Processed</p>
+                <h3 class="text-3xl font-bold">₹0</h3>
+              </div>
+            </div>
+            <div class="text-slate-400 text-center py-10 border border-brand-border border-dashed rounded-xl">Transactions Table Placeholder</div>
+          </div>
+        </div>
+
+        <!-- Support Content -->
+        <div id="supportContent" class="hidden w-full">
+          <div class="glass-card border border-brand-border rounded-2xl p-6">
+            <h3 class="text-xl font-bold mb-6 pb-6 border-b border-brand-border">Support & Disputes</h3>
+            <div class="text-slate-400 text-center py-10 border border-brand-border border-dashed rounded-xl">Support Tickets Table Placeholder</div>
+          </div>
+        </div>
+
+        <!-- Reports Content -->
+        <div id="reportsContent" class="hidden w-full">
+          <div class="glass-card border border-brand-border rounded-2xl p-6">
+            <h3 class="text-xl font-bold mb-6 pb-6 border-b border-brand-border">Reports & Analytics</h3>
+            <div class="text-slate-400 text-center py-10 border border-brand-border border-dashed rounded-xl">Analytics Charts Placeholder</div>
+          </div>
+        </div>
+
+        <!-- CMS Content -->
+        <div id="cmsContent" class="hidden w-full">
+          <div class="glass-card border border-brand-border rounded-2xl p-6">
+            <h3 class="text-xl font-bold mb-6 pb-6 border-b border-brand-border">CMS Management</h3>
+            <div class="text-slate-400 text-center py-10 border border-brand-border border-dashed rounded-xl">CMS Forms Placeholder</div>
+          </div>
+        </div>
+
       </main>
     </div>
   </div>

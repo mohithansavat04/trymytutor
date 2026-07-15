@@ -70,6 +70,18 @@ exports.getMySchedules = async (req, res) => {
   }
 };
 
+exports.markScheduleComplete = async (req, res) => {
+  try {
+    const schedule = await Schedule.findOne({ _id: req.params.id, tutor: req.user._id });
+    if (!schedule) return res.status(404).json({ message: 'Schedule not found' });
+    schedule.status = 'Completed';
+    await schedule.save();
+    res.json({ message: 'Session marked complete', schedule });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
 // --- Payouts ---
 exports.requestPayout = async (req, res) => {
   try {

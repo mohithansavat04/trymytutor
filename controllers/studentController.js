@@ -3,6 +3,17 @@ const Bid = require('../models/Bid');
 const Schedule = require('../models/Schedule');
 const Ticket = require('../models/Ticket');
 const Rating = require('../models/Rating');
+const User = require('../models/User');
+
+// --- Tutors ---
+exports.searchTutors = async (req, res) => {
+  try {
+    const tutors = await User.find({ role: 'Tutor' }).select('-password');
+    res.json(tutors);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
 
 // --- Requirements ---
 exports.postRequirement = async (req, res) => {
@@ -83,6 +94,19 @@ exports.getMySchedules = async (req, res) => {
       .populate('requirement', 'subject')
       .sort('date');
     res.json(schedules);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+exports.markAttendance = async (req, res) => {
+  try {
+    const schedule = await Schedule.findOne({ _id: req.params.id, student: req.user._id });
+    if (!schedule) return res.status(404).json({ message: 'Schedule not found' });
+    schedule.attendanceStatus = 'Present';
+    schedule.status = 'Completed';
+    await schedule.save();
+    res.json({ message: 'Attendance marked', schedule });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }

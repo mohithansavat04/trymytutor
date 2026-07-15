@@ -85,26 +85,117 @@ exports.updateProfile = async (req, res) => {
 
     if (user) {
       user.name = req.body.name || user.name;
-      user.phone = req.body.phone || user.phone;
       user.address = req.body.address || user.address;
       user.subjects = req.body.subjects || user.subjects;
       
+      if (req.body.gender) user.gender = req.body.gender;
+      if (req.body.age) user.age = req.body.age;
+      if (req.body.classLevel) user.classLevel = req.body.classLevel;
+      if (req.body.email && !user.email.endsWith('@phoneauth.app')) user.email = req.body.email;
+      else if (req.body.email && user.email.endsWith('@phoneauth.app')) {
+        // First time setting real email
+        const emailExists = await User.findOne({ email: req.body.email });
+        if (!emailExists) user.email = req.body.email;
+      }
+
       if (req.body.password) {
         user.password = req.body.password;
       }
 
       const updatedUser = await user.save();
 
-      res.json({
-        _id: updatedUser._id,
-        name: updatedUser.name,
-        email: updatedUser.email,
-        role: updatedUser.role,
-        token: generateToken(updatedUser._id)
-      });
+      res.json(updatedUser);
     } else {
       res.status(404).json({ message: 'User not found' });
     }
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+exports.sendOtp = async (req, res) => {
+  try {
+    const { phone } = req.body;
+    if (!phone) {
+      return res.status(400).json({ message: 'Phone number is required' });
+    }
+    // Hardcoded static OTP as requested
+    res.json({ message: 'OTP sent successfully', otp: '1234' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+exports.verifyOtp = async (req, res) => {
+  try {
+    const { phone, otp, role, name } = req.body;
+    
+    if (!phone || !otp) {
+      return res.status(400).json({ message: 'Phone and OTP are required' });
+    }
+
+    if (otp !== '1234') {
+      return res.status(401).json({ message: 'Invalid OTP' });
+    }
+
+    let user = await User.findOne({ phone });
+
+    // If user doesn't exist, register them
+    if (!user) {
+      if (!role || !['Student / Parent', 'Tutor'].includes(role)) {
+        return res.status(400).json({ message: 'Valid role is required for new registration' });
+      }
+
+      user = await User.create({
+        phone,
+        email: `${phone}@phoneauth.app`, // prevent E11000 duplicate key on email
+        role,
+        name: name || 'User',
+        status: role === 'Tutor' ? 'Pending' : 'Active'
+      });
+    }
+
+    res.json({
+      _id: user._id,
+      name: user.name,
+      phone: user.phone,
+      role: user.role,
+      isNewUser: user.email ? user.email.endsWith('@phoneauth.app') : true, 
+      token: generateToken(user._id)
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+exports.changePhoneRequest = async (req, res) => {
+  try {
+    const { newPhone } = req.body;
+    if (!newPhone) return res.status(400).json({ message: 'New phone number is required' });
+    
+    const existing = await User.findOne({ phone: newPhone });
+    if (existing) return res.status(400).json({ message: 'Phone number already in use' });
+
+    res.json({ message: 'OTP sent to new phone number', otp: '1234' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+exports.changePhoneVerify = async (req, res) => {
+  try {
+    const { newPhone, otp } = req.body;
+    if (!newPhone || !otp) return res.status(400).json({ message: 'Phone and OTP are required' });
+    if (otp !== '1234') return res.status(401).json({ message: 'Invalid OTP' });
+
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    user.phone = newPhone;
+    await user.save();
+
+    res.json({ message: 'Phone number updated successfully', phone: user.phone });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }

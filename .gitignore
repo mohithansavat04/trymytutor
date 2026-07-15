@@ -1,3 +1,14 @@
 node_modules/
 .env
 .env.*
+
+# Scratch and test files
+scripts/fix_*.js
+scripts/patch_*.js
+scripts/build_*.js
+scripts/expose_*.js
+scripts/test_*.js
+scripts/add_*.js
+scripts/e2e_test_seed.js
+public/admin/categories_snippet.html
+public/admin/js/categories.js

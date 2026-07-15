@@ -26,7 +26,8 @@ const mcqSchema = new mongoose.Schema({
       },
       message: 'Correct option index is out of bounds'
     }
-  }
+  },
+  deletedAt: { type: Date, default: null }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Mcq', mcqSchema);

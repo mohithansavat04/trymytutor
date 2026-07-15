@@ -7,11 +7,13 @@ const adminRoutes = require('./routes/adminRoutes');
 const authRoutes = require('./routes/authRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 const tutorRoutes = require('./routes/tutorRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
+app.set('view engine', 'ejs');
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -28,10 +30,17 @@ app.use('/api/auth', authRoutes);
 app.use('/api/student', studentRoutes);
 app.use('/api/tutor', tutorRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/chat', chatRoutes);
 
 // Fallback for SPA/Frontend
+app.use('/admin', (req, res) => {
+  res.render('admin/index');
+});
+app.get('/', (req, res) => {
+  res.redirect('/admin');
+});
 app.use((req, res) => {
-  res.sendFile(__dirname + '/public/admin/index.html');
+  res.status(404).send('Not Found');
 });
 
 // Start Server

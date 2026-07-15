@@ -17,7 +17,7 @@ const transactionSchema = new mongoose.Schema({
   },
   purpose: {
     type: String,
-    enum: ['recharge', 'tuition_fee', 'demo_fee', 'bidding_fee', 'travel_surcharge', 'cancellation_penalty', 'payout', 'refund'],
+    enum: ['recharge', 'tuition_fee', 'demo_fee', 'bidding_fee', 'travel_surcharge', 'cancellation_penalty', 'payout', 'refund', 'registration_fee'],
     required: true
   },
   status: {
@@ -27,7 +27,14 @@ const transactionSchema = new mongoose.Schema({
   },
   referenceId: {
     type: String, // Can be external payment gateway ID or internal reference
-  }
+  },
+  processorCode: {
+    type: String,
+  },
+  gatewayTransactionId: {
+    type: String,
+  },
+  deletedAt: { type: Date, default: null }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Transaction', transactionSchema);

@@ -27,7 +27,16 @@ const ratingSchema = new mongoose.Schema({
   },
   reviewText: {
     type: String
-  }
+  },
+  visibilityStatus: {
+    type: Boolean,
+    default: true
+  },
+  moderationFlag: {
+    type: Boolean,
+    default: false
+  },
+  deletedAt: { type: Date, default: null }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Rating', ratingSchema);

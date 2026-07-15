@@ -1,0 +1,135 @@
+<div id="settingsContent" class="hidden w-full">
+          
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Lead Engine Section -->
+            <div class="glass-card border border-brand-border rounded-2xl flex flex-col">
+              <div class="flex justify-between items-center p-6 border-b border-brand-border bg-slate-900/50 rounded-t-2xl">
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider">Lead Engine</h3>
+                <span class="text-sm font-bold text-slate-400 uppercase tracking-wider">Value</span>
+              </div>
+              <div class="p-0 flex-grow">
+                <table class="w-full text-left border-collapse h-full">
+                  <tbody class="divide-y divide-brand-border" id="settingsTableBody">
+                    <tr class="hover:bg-slate-800/30 transition-colors">
+                      <td class="py-4 px-6 text-sm font-medium text-white">Batch size</td>
+                      <td class="py-4 px-6 text-right w-64">
+                        <input type="number" id="stgBatchSize" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-brand text-sm" value="10">
+                      </td>
+                    </tr>
+                    <tr class="hover:bg-slate-800/30 transition-colors">
+                      <td class="py-4 px-6 text-sm font-medium text-white">Batch interval</td>
+                      <td class="py-4 px-6 text-right w-64">
+                        <input type="text" id="stgBatchInterval" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-brand text-sm" value="60 min">
+                      </td>
+                    </tr>
+                    <tr class="hover:bg-slate-800/30 transition-colors">
+                      <td class="py-4 px-6 text-sm font-medium text-white">Auto-bid delay</td>
+                      <td class="py-4 px-6 text-right w-64">
+                        <input type="text" id="stgAutoBidDelay" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-brand text-sm" value="2-3 min">
+                      </td>
+                    </tr>
+                    <tr class="hover:bg-slate-800/30 transition-colors">
+                      <td class="py-4 px-6 text-sm font-medium text-white">Concurrent cap</td>
+                      <td class="py-4 px-6 text-right w-64">
+                        <input type="number" id="stgConcurrentDemoCap" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-brand text-sm" value="5">
+                      </td>
+                    </tr>
+                    <tr class="hover:bg-slate-800/30 transition-colors">
+                      <td class="py-4 px-6 text-sm font-medium text-white">Reschedule cutoff</td>
+                      <td class="py-4 px-6 text-right w-64">
+                        <input type="text" id="stgRescheduleCutoff" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-brand text-sm" value="60 min">
+                      </td>
+                    </tr>
+                    <tr class="hover:bg-slate-800/30 transition-colors">
+                      <td class="py-4 px-6 text-sm font-medium text-white">Platform fee (%)</td>
+                      <td class="py-4 px-6 text-right w-64">
+                        <input type="number" id="stgPlatformFee" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-brand text-sm" value="10">
+                      </td>
+                    </tr>
+                    <tr class="hover:bg-slate-800/30 transition-colors">
+                      <td class="py-4 px-6 text-sm font-medium text-white">Average Price Calc</td>
+                      <td class="py-4 px-6 text-right w-64">
+                        <select id="stgAveragePriceCalculation" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-brand text-sm">
+                          <option value="Mean">Mean</option>
+                          <option value="Median">Median</option>
+                        </select>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+  
+            <!-- Roles & Permissions Section -->
+            <div class="glass-card border border-brand-border rounded-2xl flex flex-col">
+              <div class="flex justify-between items-center p-6 border-b border-brand-border bg-slate-900/50 rounded-t-2xl">
+                <div class="flex items-center gap-4">
+                  <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider">Roles</h3>
+                  <button id="openAddRoleBtn" class="text-xs bg-brand hover:bg-orange-500 text-white font-medium py-1 px-3 rounded-lg transition-colors">
+                    + Add Role
+                  </button>
+                </div>
+              </div>
+              <div id="rolesList" class="p-0 flex-grow">
+                <!-- Roles rendered here -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Team Member Section -->
+          <div class="glass-card border border-brand-border rounded-2xl">
+            <div class="flex justify-between items-center p-6 border-b border-brand-border bg-slate-900/50 rounded-t-2xl">
+              <div class="flex items-center gap-4 w-1/2">
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider">Team Member</h3>
+                <button id="openAddTeamMemberBtn" class="text-xs bg-brand hover:bg-orange-500 text-white font-medium py-1 px-3 rounded-lg transition-colors">
+                  + Add Member
+                </button>
+              </div>
+              <span class="text-sm font-bold text-slate-400 uppercase tracking-wider w-1/4">Role</span>
+              <span class="w-1/4"></span>
+            </div>
+            <div class="p-0">
+              <table class="w-full text-left border-collapse">
+                <tbody class="divide-y divide-brand-border" id="teamTableBody">
+                  <!-- dynamically populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+<!-- Dynamic Generic Form Modal for settings -->
+<div id="settingsModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50">
+  <div class="flex items-center justify-center min-h-screen px-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all">
+      <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+        <h3 class="text-lg leading-6 font-semibold text-gray-900" id="settingsModalTitle">Create/Edit settings</h3>
+        <button onclick="document.getElementById('settingsModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-500 focus:outline-none">
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+      <div class="px-6 py-6">
+        <form id="settingsForm" class="space-y-4">
+          <input type="hidden" id="settingsId" name="id">
+          <!-- Dynamic inputs will be injected here or generic fields -->
+          <div class="form-group">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <select name="status" id="settingsStatus" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+              <option value="Active">Active</option>
+              <option value="Pending">Pending</option>
+              <option value="Closed">Closed</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Notes / Description</label>
+            <textarea name="description" id="settingsNotes" rows="3" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end space-x-3">
+        <button type="button" onclick="document.getElementById('settingsModal').classList.add('hidden')" class="px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Cancel</button>
+        <button type="button" onclick="submitGenericForm('settings')" class="px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>

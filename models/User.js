@@ -3,11 +3,11 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
+    default: 'User',
   },
   email: {
     type: String,
-    required: true,
+    sparse: true,
     unique: true,
   },
   role: {
@@ -15,11 +15,8 @@ const userSchema = new mongoose.Schema({
     enum: ['Student / Parent', 'Tutor'],
     required: true
   },
-  status: {
-    type: String,
-    enum: ['Active', 'Pending', 'Suspended'],
-    default: 'Active'
-  },
+  status: { type: String, enum: ['Active', 'Inactive', 'Pending', 'Banned'], default: 'Active' },
+  isDeleted: { type: Boolean, default: false },
   phone: {
     type: String,
     unique: true,
@@ -60,6 +57,19 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
+  gender: {
+    type: String,
+    enum: ['Male', 'Female', 'Other', 'Not Specified'],
+    default: 'Not Specified'
+  },
+  age: {
+    type: Number,
+    default: null
+  },
+  classLevel: {
+    type: String,
+    default: ''
+  },
   // Tutor specific fields
   experience: {
     type: Number,
@@ -71,8 +81,8 @@ const userSchema = new mongoose.Schema({
   },
   tutorState: {
     type: String,
-    enum: ['Interview pending', 'Live', 'In-house', 'MCQ Failed', 'Suspended'],
-    default: 'Interview pending'
+    enum: ['Pending', 'Interview Passed', 'Live', 'Rejected', 'Interview pending', 'In-house', 'MCQ Failed', 'Suspended'],
+    default: 'Pending'
   },
   radius: {
     type: Number,
@@ -89,7 +99,8 @@ const userSchema = new mongoose.Schema({
   notifications: {
     type: Boolean,
     default: true
-  }
+  },
+  deletedAt: { type: Date, default: null }
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

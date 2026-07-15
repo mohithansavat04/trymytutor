@@ -18,7 +18,8 @@ const cmsPageSchema = new mongoose.Schema({
     type: String,
     enum: ['Published', 'Draft'],
     default: 'Draft'
-  }
+  },
+  deletedAt: { type: Date, default: null }
 }, { timestamps: true });
 
 module.exports = mongoose.model('CmsPage', cmsPageSchema);

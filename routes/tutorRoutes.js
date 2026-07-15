@@ -11,6 +11,7 @@ router.post('/requirements/:id/bid', tutorController.submitBid);
 router.get('/bids', tutorController.getMyBids);
 
 router.get('/schedules', tutorController.getMySchedules);
+router.post('/schedules/:id/complete', tutorController.markScheduleComplete);
 router.post('/wallet/payout', tutorController.requestPayout);
 
 module.exports = router;

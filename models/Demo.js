@@ -22,9 +22,10 @@ const demoSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['Scheduled', 'Completed', 'Cancelled'],
+    enum: ['Scheduled', 'Completed', 'Cancelled', 'Rescheduled'],
     default: 'Scheduled'
-  }
+  },
+  deletedAt: { type: Date, default: null }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Demo', demoSchema);

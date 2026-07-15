@@ -12,7 +12,7 @@ const payoutSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['Pending', 'Processed', 'Rejected'],
+    enum: ['Pending', 'Transferred', 'Processed', 'Rejected'],
     default: 'Pending'
   },
   bankDetails: {
@@ -27,7 +27,11 @@ const payoutSchema = new mongoose.Schema({
   },
   remarks: {
     type: String
-  }
+  },
+  txHash: {
+    type: String
+  },
+  deletedAt: { type: Date, default: null }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Payout', payoutSchema);

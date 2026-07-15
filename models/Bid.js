@@ -21,9 +21,10 @@ const bidSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['Pending', 'Accepted', 'Rejected'],
+    enum: ['Pending', 'Accepted', 'Rejected', 'Cancelled'],
     default: 'Pending'
-  }
+  },
+  deletedAt: { type: Date, default: null }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Bid', bidSchema);

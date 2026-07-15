@@ -28,7 +28,11 @@ const ticketSchema = new mongoose.Schema({
     type: String,
     enum: ['Low', 'Medium', 'High', 'Urgent'],
     default: 'Medium'
-  }
+  },
+  resolutionLog: {
+    type: String
+  },
+  deletedAt: { type: Date, default: null }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Ticket', ticketSchema);

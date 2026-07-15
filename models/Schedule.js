@@ -37,7 +37,8 @@ const scheduleSchema = new mongoose.Schema({
     type: String,
     enum: ['Pending', 'Present', 'Absent'],
     default: 'Pending'
-  }
+  },
+  deletedAt: { type: Date, default: null }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Schedule', scheduleSchema);

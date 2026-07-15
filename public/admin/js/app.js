@@ -1,5 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
+
+  window.API_BASE = '/api/admin';
+  window.getToken = () => localStorage.getItem('adminToken');
+  window.getRole = () => localStorage.getItem('adminRole');
+
   const API_BASE = '/api/admin';
+  window.API_BASE = API_BASE;
   let allUsers = [];
 
   // --- Views ---
@@ -184,6 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- State Management ---
   const getToken = () => localStorage.getItem('adminToken');
+  window.getToken = getToken;
   const getRole = () => localStorage.getItem('adminRole');
   const getPermissions = () => {
     try { return JSON.parse(localStorage.getItem('adminPermissions') || '[]'); } 
@@ -241,6 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const checkAuth = () => {
+  window.checkAuth = checkAuth;
     if (getToken()) {
       loginView.classList.remove('flex');
       loginView.classList.add('hidden');
@@ -1834,20 +1842,190 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  window.fetchCms = async () => {
+
+if (editAccessForm) {
+    editAccessForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('editAccessAdminId').value;
+      const role = document.getElementById('editAccessRole').value;
+      try {
+        const res = await fetch(`${API_BASE}/team/${id}/role`, {
+          method: 'PUT',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getToken()}` 
+          },
+          body: JSON.stringify({ role })
+        });
+        if (res.ok) {
+          closeAccessModal();
+          fetchTeamMembers();
+        } else {
+          const errData = await res.json();
+          alert(errData.message || 'Error updating role');
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  }
+
+  const roleModal = document.getElementById('roleModal');
+  const roleForm = document.getElementById('roleForm');
+  const openAddRoleBtn = document.getElementById('openAddRoleBtn');
+  const closeRoleModalBtn = document.getElementById('closeRoleModalBtn');
+  const cancelRoleBtn = document.getElementById('cancelRoleBtn');
+  const roleModalTitle = document.getElementById('roleModalTitle');
+
+  const closeRoleMod = () => roleModal.classList.remove('active');
+  if (closeRoleModalBtn) closeRoleModalBtn.addEventListener('click', closeRoleMod);
+  if (cancelRoleBtn) cancelRoleBtn.addEventListener('click', closeRoleMod);
+
+  if (openAddRoleBtn) openAddRoleBtn.addEventListener('click', () => {
+    roleForm.reset();
+    document.getElementById('roleId').value = '';
+    roleModalTitle.textContent = 'Add Role';
+    document.querySelectorAll('.permission-checkbox').forEach(cb => cb.checked = false);
+    roleModal.classList.add('active');
+  });
+
+  window.openEditRole = (id) => {
+    const role = allRoles.find(r => r._id === id);
+    if (!role) return;
+    roleForm.reset();
+    document.getElementById('roleId').value = role._id;
+    document.getElementById('roleName').value = role.name;
+    roleModalTitle.textContent = 'Edit Role';
+    document.querySelectorAll('.permission-checkbox').forEach(cb => {
+      cb.checked = role.permissions.includes(cb.value);
+    });
+    roleModal.classList.add('active');
+  };
+
+  window.deleteRole = async (id) => {
+    if(!confirm('Are you sure you want to delete this role?')) return;
     try {
-      const res = await fetch(`${API_BASE}/cms`, {
+      const res = await fetch(`${API_BASE}/roles/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${getToken()}` }
+      });
+      if (res.ok) {
+        fetchRoles();
+      } else {
+        const errData = await res.json();
+        alert(errData.message || 'Error deleting role');
+      }
+    } catch (err) { console.error(err); }
+  };
+
+  if (roleForm) {
+    roleForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('roleId').value;
+      const name = document.getElementById('roleName').value;
+      const permissions = Array.from(document.querySelectorAll('.permission-checkbox:checked')).map(cb => cb.value);
+
+      const url = id ? `${API_BASE}/roles/${id}` : `${API_BASE}/roles`;
+      const method = id ? 'PUT' : 'POST';
+
+      try {
+        const res = await fetch(url, {
+          method,
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${getToken()}` 
+          },
+          body: JSON.stringify({ name, permissions })
+        });
+        if (res.ok) {
+          closeRoleMod();
+          fetchRoles();
+        } else {
+          const errData = await res.json();
+          alert(errData.message || 'Error saving role');
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  }
+
+  // ==========================================
+  // --- New Dynamic Modules ---
+  // ==========================================
+
+  window.fetchCalendars = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/schedules`, {
         headers: { 'Authorization': `Bearer ${getToken()}` }
       });
       if (res.ok) {
         const data = await res.json();
-        const container = document.getElementById('cmsContent').querySelector('.border-dashed');
+        const container = document.getElementById('calendarsContent').querySelector('.text-center');
         if (data.length === 0) {
-          container.innerHTML = '<p class="text-slate-500">No CMS pages found.</p>';
+          container.innerHTML = '<p class="text-slate-500">No schedules found.</p>';
         } else {
-          let html = `<table class="w-full text-left mt-4"><thead class="text-xs uppercase bg-slate-800 text-slate-400"><tr><th class="px-4 py-3">Title</th><th class="px-4 py-3">Slug</th><th class="px-4 py-3">Status</th></tr></thead><tbody class="divide-y divide-slate-800">`;
-          data.forEach(c => {
-            html += `<tr class="hover:bg-slate-800/50"><td class="px-4 py-3 text-sm text-white font-medium">${c.title}</td><td class="px-4 py-3 text-sm text-slate-400">/${c.slug}</td><td class="px-4 py-3 text-sm"><span class="px-2 py-1 bg-brand/10 text-brand rounded">${c.status}</span></td></tr>`;
+          let html = `<table class="w-full text-left mt-4"><thead class="text-xs uppercase bg-slate-800 text-slate-400"><tr><th class="px-4 py-3">Date</th><th class="px-4 py-3">Time</th><th class="px-4 py-3">Status</th></tr></thead><tbody class="divide-y divide-slate-800">`;
+          data.forEach(s => {
+            html += `<tr class="hover:bg-slate-800/50"><td class="px-4 py-3 text-sm text-white">${new Date(s.date).toLocaleDateString()}</td><td class="px-4 py-3 text-sm text-slate-300">${s.startTime} - ${s.endTime}</td><td class="px-4 py-3 text-sm"><span class="px-2 py-1 bg-brand/10 text-brand rounded">${s.status}</span></td></tr>`;
+          });
+          html += `</tbody></table>`;
+          container.innerHTML = html;
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch schedules', err);
+    }
+  };
+
+  window.fetchFinance = async () => {
+    try {
+      const txRes = await fetch(`${API_BASE}/transactions`, { headers: { 'Authorization': `Bearer ${getToken()}` } });
+      const payoutRes = await fetch(`${API_BASE}/payouts`, { headers: { 'Authorization': `Bearer ${getToken()}` } });
+      
+      if (txRes.ok && payoutRes.ok) {
+        const txData = await txRes.json();
+        const payoutData = await payoutRes.json();
+        
+        const container = document.getElementById('financeContent').querySelector('.border-dashed');
+        if (txData.length === 0 && payoutData.length === 0) {
+          container.innerHTML = '<p class="text-slate-500">No transactions or payouts found.</p>';
+        } else {
+          let html = `<h3 class="text-lg font-bold text-white mb-2">Transactions</h3><table class="w-full text-left mb-8"><thead class="text-xs uppercase bg-slate-800 text-slate-400"><tr><th class="px-4 py-3">Amount</th><th class="px-4 py-3">Type</th><th class="px-4 py-3">Purpose</th><th class="px-4 py-3">Status</th></tr></thead><tbody class="divide-y divide-slate-800">`;
+          txData.forEach(tx => {
+            html += `<tr class="hover:bg-slate-800/50"><td class="px-4 py-3 text-sm text-white">₹${tx.amount}</td><td class="px-4 py-3 text-sm text-slate-300">${tx.type}</td><td class="px-4 py-3 text-sm text-slate-300">${tx.purpose}</td><td class="px-4 py-3 text-sm"><span class="px-2 py-1 bg-green-500/10 text-green-400 rounded">${tx.status}</span></td></tr>`;
+          });
+          html += `</tbody></table>`;
+          
+          html += `<h3 class="text-lg font-bold text-white mb-2">Payout Requests</h3><table class="w-full text-left"><thead class="text-xs uppercase bg-slate-800 text-slate-400"><tr><th class="px-4 py-3">Amount</th><th class="px-4 py-3">Bank Details</th><th class="px-4 py-3">Status</th></tr></thead><tbody class="divide-y divide-slate-800">`;
+          payoutData.forEach(p => {
+            html += `<tr class="hover:bg-slate-800/50"><td class="px-4 py-3 text-sm text-white">₹${p.amount}</td><td class="px-4 py-3 text-sm text-slate-400">${p.bankDetails ? p.bankDetails.bankName : 'N/A'}</td><td class="px-4 py-3 text-sm"><span class="px-2 py-1 bg-yellow-500/10 text-yellow-400 rounded">${p.status}</span></td></tr>`;
+          });
+          html += `</tbody></table>`;
+          
+          container.className = 'w-full';
+          container.innerHTML = html;
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch finance data', err);
+    }
+  };
+
+  window.fetchSupport = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/tickets`, {
+        headers: { 'Authorization': `Bearer ${getToken()}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const container = document.getElementById('supportContent').querySelector('.border-dashed');
+        if (data.length === 0) {
+          container.innerHTML = '<p class="text-slate-500">No support tickets found.</p>';
+        } else {
+          let html = `<table class="w-full text-left mt-4"><thead class="text-xs uppercase bg-slate-800 text-slate-400"><tr><th class="px-4 py-3">Subject</th><th class="px-4 py-3">Type</th><th class="px-4 py-3">Priority</th><th class="px-4 py-3">Status</th></tr></thead><tbody class="divide-y divide-slate-800">`;
+          data.forEach(t => {
+            html += `<tr class="hover:bg-slate-800/50"><td class="px-4 py-3 text-sm text-white font-medium">${t.subject}</td><td class="px-4 py-3 text-sm text-slate-300">${t.type}</td><td class="px-4 py-3 text-sm text-red-400">${t.priority}</td><td class="px-4 py-3 text-sm"><span class="px-2 py-1 bg-blue-500/10 text-blue-400 rounded">${t.status}</span></td></tr>`;
           });
           html += `</tbody></table>`;
           container.className = 'w-full';
@@ -1855,8 +2033,149 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     } catch (err) {
-      console.error('Failed to fetch CMS pages', err);
+      console.error('Failed to fetch support tickets', err);
     }
   };
 
 });
+
+
+// ==========================================
+// --- Unified Router & Auth Guard ---
+// ==========================================
+(function() {
+  window.addEventListener('popstate', function() {
+    handleRouting();
+  });
+
+  const originalPushState = history.pushState;
+  history.pushState = function(state, title, url) {
+    originalPushState.apply(history, arguments);
+    handleRouting();
+  };
+
+  const originalReplaceState = history.replaceState;
+  history.replaceState = function(state, title, url) {
+    originalReplaceState.apply(history, arguments);
+    handleRouting();
+  };
+
+  function handleRouting() {
+    const token = localStorage.getItem('adminToken');
+    const loginView = document.getElementById('loginView');
+    const dashboardView = document.getElementById('dashboardView');
+    const path = window.location.pathname;
+
+    if (!token) {
+      if(dashboardView) dashboardView.classList.add('hidden');
+      if(loginView) loginView.classList.remove('hidden');
+      if(path !== '/admin/login' && path !== '/admin' && path !== '/admin/') {
+         window.history.replaceState(null, '', '/admin/login');
+      }
+      return;
+    }
+
+    // Has token
+    if(loginView) loginView.classList.add('hidden');
+    if(dashboardView) dashboardView.classList.remove('hidden');
+    
+    if (path === '/admin/login' || path === '/admin' || path === '/admin/') {
+       window.history.replaceState(null, '', '/admin/dashboard');
+       if(typeof switchMenu === 'function') switchMenu('dashboard', false);
+       return;
+    }
+
+    // Try to switch menu based on path
+    const menuName = path.replace('/admin/', '');
+    if(menuName && typeof switchMenu === 'function') {
+       switchMenu(menuName, false);
+       // Call appropriate fetch function if it exists
+       const fetchName = 'fetch' + menuName.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('');
+       if(typeof window[fetchName] === 'function') window[fetchName]();
+    }
+  }
+
+  // Run once on load after a short delay to allow DOM to bind variables
+  setTimeout(() => {
+    handleRouting();
+  }, 100);
+})();
+
+
+// ==========================================
+// --- Dynamic Menu & Routing Override ---
+// ==========================================
+(function() {
+  const activeMenuClass = ['bg-brand/10', 'text-brand'];
+  const inactiveMenuClass = ['text-slate-400', 'hover:bg-slate-800', 'hover:text-white'];
+  const mainHeaderTitle = document.getElementById('mainHeaderTitle');
+
+  // Discover all menus dynamically
+  const menuElements = Array.from(document.querySelectorAll('a[id^="menu"]'));
+  const dynamicMenus = menuElements.map(el => {
+    let name = el.id.replace('menu', '');
+    name = name.charAt(0).toLowerCase() + name.slice(1);
+    
+    // Convert camelCase to kebab-case for URLs
+    const kebabName = name.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2').toLowerCase();
+    
+    const content = document.getElementById(name + 'Content');
+    const title = el.querySelector('span') ? el.querySelector('span').textContent.trim() : name;
+    
+    return { el, content, title, name: kebabName, camelName: name };
+  });
+
+  window.switchMenu = (menuName, pushState = true) => {
+    // Also hide default dashboard content if clicking something else
+    const dashboardContent = document.getElementById('dashboardContent');
+    if (dashboardContent) dashboardContent.classList.add('hidden');
+    
+    dynamicMenus.forEach(m => {
+      if (m.name === menuName || m.camelName === menuName) {
+        m.el.classList.add(...activeMenuClass);
+        m.el.classList.remove(...inactiveMenuClass);
+        if(m.content) m.content.classList.remove('hidden');
+        if(mainHeaderTitle) mainHeaderTitle.textContent = m.title;
+      } else {
+        m.el.classList.remove(...activeMenuClass);
+        m.el.classList.add(...inactiveMenuClass);
+        if(m.content) m.content.classList.add('hidden');
+      }
+    });
+
+    const openAddUserModal = document.getElementById('openAddUserModal');
+    const openAddTutorModalBtn = document.getElementById('openAddTutorModalBtn');
+    
+    if(openAddUserModal && openAddTutorModalBtn) {
+      if (menuName === 'users') {
+        openAddUserModal.classList.remove('hidden'); openAddUserModal.classList.add('flex');
+        openAddTutorModalBtn.classList.add('hidden'); openAddTutorModalBtn.classList.remove('flex');
+      } else if (menuName === 'tutor-approvals') {
+        openAddTutorModalBtn.classList.remove('hidden'); openAddTutorModalBtn.classList.add('flex');
+        openAddUserModal.classList.add('hidden'); openAddUserModal.classList.remove('flex');
+      } else {
+        openAddUserModal.classList.add('hidden'); openAddUserModal.classList.remove('flex');
+        openAddTutorModalBtn.classList.add('hidden'); openAddTutorModalBtn.classList.remove('flex');
+      }
+    }
+
+    if (pushState) {
+      window.history.pushState({ menu: menuName }, '', `/admin/${menuName}`);
+    }
+  };
+
+  // Bind click events dynamically
+  dynamicMenus.forEach(m => {
+    m.el.addEventListener('click', (e) => {
+      e.preventDefault();
+      switchMenu(m.name);
+      
+      // Auto-call fetch function
+      const fetchName = 'fetch' + m.camelName.charAt(0).toUpperCase() + m.camelName.slice(1);
+      if(typeof window[fetchName] === 'function') {
+        window[fetchName]();
+      }
+    });
+  });
+
+})();

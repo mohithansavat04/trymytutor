@@ -1,0 +1,48 @@
+<div id="tutorApprovalsContent" class="hidden">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+            <div class="glass-card p-6 rounded-2xl border border-brand-border hover:border-brand/50 transition-colors">
+              <h3 class="text-3xl font-bold" id="metricAwaitingInterview">0</h3>
+              <p class="text-sm text-slate-400 font-medium mt-1">Awaiting interview</p>
+            </div>
+            <div class="glass-card p-6 rounded-2xl border border-brand-border hover:border-brand/50 transition-colors">
+              <h3 class="text-3xl font-bold" id="metricLiveTutors">0</h3>
+              <p class="text-sm text-slate-400 font-medium mt-1">Live tutors</p>
+            </div>
+            <div class="glass-card p-6 rounded-2xl border border-brand-border hover:border-brand/50 transition-colors">
+              <h3 class="text-3xl font-bold" id="metricMcqFailed">0</h3>
+              <p class="text-sm text-slate-400 font-medium mt-1">MCQ failed today</p>
+            </div>
+            <div class="glass-card p-6 rounded-2xl border border-brand-border hover:border-brand/50 transition-colors">
+              <h3 class="text-3xl font-bold" id="metricSuspended">0</h3>
+              <p class="text-sm text-slate-400 font-medium mt-1">Suspended this week</p>
+            </div>
+          </div>
+
+          <div class="glass-card border border-brand-border rounded-2xl p-6">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr>
+                    <th
+                      class="py-4 px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-brand-border">
+                      Tutor</th>
+                    <th
+                      class="py-4 px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-brand-border">
+                      Subjects</th>
+                    <th
+                      class="py-4 px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-brand-border">
+                      MCQ</th>
+                    <th
+                      class="py-4 px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-brand-border">
+                      State</th>
+                    <th
+                      class="py-4 px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-brand-border text-center">
+                      Action</th>
+                  </tr>
+                </thead>
+                <tbody id="tutorApprovalsTableBody">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>

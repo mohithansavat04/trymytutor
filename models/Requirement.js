@@ -30,11 +30,9 @@ const requirementSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  status: {
-    type: String,
-    enum: ['Open', 'Closed', 'Demo Scheduled'],
-    default: 'Open'
-  }
+  status: { type: String, enum: ['Open', 'Assigned', 'Closed'], default: 'Open' },
+  isDeleted: { type: Boolean, default: false },
+  deletedAt: { type: Date, default: null }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Requirement', requirementSchema);

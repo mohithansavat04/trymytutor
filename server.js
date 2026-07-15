@@ -22,7 +22,35 @@ app.use(express.static('public')); // Serve static frontend files
 // Database connection
 const DB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/trymytutor';
 mongoose.connect(DB_URI)
-  .then(() => console.log('MongoDB connected successfully'))
+  .then(async () => {
+    console.log('MongoDB connected successfully');
+    try {
+      const Admin = require('./models/Admin');
+      const count = await Admin.countDocuments();
+      if (count === 0) {
+        console.log('No admins found in database. Auto-seeding default superadmin...');
+        const bcrypt = require('bcryptjs');
+        const hashedPassword = await bcrypt.hash('Admin@123', 10);
+        await Admin.create({
+          name: 'Super Admin',
+          email: 'admin@trymytutor.com',
+          password: hashedPassword,
+          role: 'Superadmin',
+          status: 'Active'
+        });
+        await Admin.create({
+          name: 'Super Admin',
+          email: 'superadmin@trymytutor.com',
+          password: hashedPassword,
+          role: 'Superadmin',
+          status: 'Active'
+        });
+        console.log('Auto-seed complete: admin@trymytutor.com / Admin@123');
+      }
+    } catch (e) {
+      console.error('Auto-seed error:', e);
+    }
+  })
   .catch(err => console.error('MongoDB connection error:', err));
 
 // Routes

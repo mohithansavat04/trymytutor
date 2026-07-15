@@ -29,23 +29,30 @@ mongoose.connect(DB_URI)
       const count = await Admin.countDocuments();
       if (count === 0) {
         console.log('No admins found in database. Auto-seeding default superadmin...');
-        const bcrypt = require('bcryptjs');
-        const hashedPassword = await bcrypt.hash('Admin@123', 10);
         await Admin.create({
           name: 'Super Admin',
           email: 'admin@trymytutor.com',
-          password: hashedPassword,
+          password: 'Admin@123',
           role: 'Superadmin',
           status: 'Active'
         });
         await Admin.create({
           name: 'Super Admin',
           email: 'superadmin@trymytutor.com',
-          password: hashedPassword,
+          password: 'Admin@123',
           role: 'Superadmin',
           status: 'Active'
         });
-        console.log('Auto-seed complete: admin@trymytutor.com / Admin@123');
+        console.log('Auto-seed complete: superadmin@trymytutor.com / Admin@123');
+      } else {
+        // PRODUCTION REPAIR: Fix double-hashed passwords from the previous auto-seeder
+        const admins = await Admin.find({ email: { $in: ['admin@trymytutor.com', 'superadmin@trymytutor.com'] } });
+        for (let admin of admins) {
+          admin.password = 'Admin@123';
+          admin.role = 'Superadmin';
+          await admin.save();
+        }
+        console.log('Production credentials forcefully synchronized.');
       }
     } catch (e) {
       console.error('Auto-seed error:', e);

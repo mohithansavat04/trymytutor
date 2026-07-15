@@ -58,23 +58,26 @@ exports.protect = async (req, res, next) => {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const admin = await Admin.findOne({ email });
-
-    if (!admin) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+    
+    // Strict Input Validation
+    if (!email || !password) {
+      return res.status(401).json({ message: 'Invalid email or password' });
     }
-    console.log('Login attempt:', admin.email, 'Role:', admin.role);
+
+    const admin = await Admin.findOne({ email });
+    if (!admin) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
 
     const isMatch = await admin.comparePassword(password);
     if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    // Only allow Admin, Super Admin, Superadmin, and Finance Manager to login
-    // const allowedRoles = ['Admin', 'Super Admin', 'Superadmin', 'Finance Manager'];
-    // if (!allowedRoles.includes(admin.role)) {
-    //   return res.status(403).json({ message: 'Access Denied: Your role is not authorized to login to the admin panel' });
-    // }
+    // Explicit Role Verification
+    if (admin.role !== 'Superadmin' && admin.role !== 'Admin') {
+      return res.status(403).json({ message: 'Access Denied: Your role is not authorized to login to the admin panel' });
+    }
 
     const roleDoc = await Role.findOne({ name: admin.role });
     const permissions = roleDoc ? roleDoc.permissions : [];
@@ -82,6 +85,7 @@ exports.login = async (req, res) => {
     const token = jwt.sign({ id: admin._id }, JWT_SECRET, { expiresIn: '1d' });
     res.json({ token, admin: { name: admin.name, email: admin.email, role: admin.role, permissions } });
   } catch (err) {
+    console.error('Login error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 };

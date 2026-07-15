@@ -6,6 +6,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const API_BASE = '/api/admin';
   window.API_BASE = API_BASE;
+
+  // --- Global Fetch Interceptor ---
+  const originalFetch = window.fetch;
+  window.fetch = async function () {
+    let [resource, config] = arguments;
+    if (!config) config = {};
+    if (!config.headers) config.headers = {};
+    
+    const token = localStorage.getItem('adminToken');
+    if (token && typeof resource === 'string' && resource.startsWith(API_BASE) && !resource.includes('/login')) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    try {
+      const response = await originalFetch(resource, config);
+      if (response.status === 401 || response.status === 403) {
+        if (typeof resource === 'string' && !resource.includes('/login')) {
+          console.warn('Unauthorized or Forbidden detected. Forcing logout.');
+          localStorage.removeItem('adminToken');
+          localStorage.removeItem('adminRole');
+          localStorage.removeItem('adminPermissions');
+          if (typeof window.checkAuth === 'function') window.checkAuth();
+        }
+      }
+      return response;
+    } catch (error) {
+      console.error('Global Fetch Error:', error);
+      throw error;
+    }
+  };
   let allUsers = [];
 
   // --- Views ---
@@ -248,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const checkAuth = () => {
-  window.checkAuth = checkAuth;
+    window.checkAuth = checkAuth;
     if (getToken()) {
       loginView.classList.remove('flex');
       loginView.classList.add('hidden');
@@ -260,6 +290,9 @@ document.addEventListener('DOMContentLoaded', () => {
       loginView.classList.remove('hidden');
       loginView.classList.add('flex');
       dashboardView.classList.add('hidden');
+      if (window.location.pathname !== '/admin/login') {
+        window.history.pushState(null, '', '/admin/login');
+      }
     }
   };
 
@@ -273,6 +306,12 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
+    const submitBtn = loginForm.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn.textContent;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Authenticating...';
+    errorMsg.classList.add('hidden');
 
     try {
       const res = await fetch(`${API_BASE}/login`, {
@@ -287,14 +326,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (data.admin && data.admin.role) localStorage.setItem('adminRole', data.admin.role);
         if (data.admin && data.admin.permissions) localStorage.setItem('adminPermissions', JSON.stringify(data.admin.permissions));
         errorMsg.classList.add('hidden');
+        window.history.pushState(null, '', '/admin/');
         checkAuth();
       } else {
-        errorMsg.textContent = data.message || 'Invalid credentials';
+        errorMsg.textContent = data.message || 'Invalid email or password';
         errorMsg.classList.remove('hidden');
       }
     } catch (err) {
-      errorMsg.textContent = 'Server error. Try again.';
+      errorMsg.textContent = 'Network or Server error. Please try again.';
       errorMsg.classList.remove('hidden');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalBtnText;
     }
   });
 
@@ -1863,86 +1906,6 @@ if (editAccessForm) {
         } else {
           const errData = await res.json();
           alert(errData.message || 'Error updating role');
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    });
-  }
-
-  const roleModal = document.getElementById('roleModal');
-  const roleForm = document.getElementById('roleForm');
-  const openAddRoleBtn = document.getElementById('openAddRoleBtn');
-  const closeRoleModalBtn = document.getElementById('closeRoleModalBtn');
-  const cancelRoleBtn = document.getElementById('cancelRoleBtn');
-  const roleModalTitle = document.getElementById('roleModalTitle');
-
-  const closeRoleMod = () => roleModal.classList.remove('active');
-  if (closeRoleModalBtn) closeRoleModalBtn.addEventListener('click', closeRoleMod);
-  if (cancelRoleBtn) cancelRoleBtn.addEventListener('click', closeRoleMod);
-
-  if (openAddRoleBtn) openAddRoleBtn.addEventListener('click', () => {
-    roleForm.reset();
-    document.getElementById('roleId').value = '';
-    roleModalTitle.textContent = 'Add Role';
-    document.querySelectorAll('.permission-checkbox').forEach(cb => cb.checked = false);
-    roleModal.classList.add('active');
-  });
-
-  window.openEditRole = (id) => {
-    const role = allRoles.find(r => r._id === id);
-    if (!role) return;
-    roleForm.reset();
-    document.getElementById('roleId').value = role._id;
-    document.getElementById('roleName').value = role.name;
-    roleModalTitle.textContent = 'Edit Role';
-    document.querySelectorAll('.permission-checkbox').forEach(cb => {
-      cb.checked = role.permissions.includes(cb.value);
-    });
-    roleModal.classList.add('active');
-  };
-
-  window.deleteRole = async (id) => {
-    if(!confirm('Are you sure you want to delete this role?')) return;
-    try {
-      const res = await fetch(`${API_BASE}/roles/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${getToken()}` }
-      });
-      if (res.ok) {
-        fetchRoles();
-      } else {
-        const errData = await res.json();
-        alert(errData.message || 'Error deleting role');
-      }
-    } catch (err) { console.error(err); }
-  };
-
-  if (roleForm) {
-    roleForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const id = document.getElementById('roleId').value;
-      const name = document.getElementById('roleName').value;
-      const permissions = Array.from(document.querySelectorAll('.permission-checkbox:checked')).map(cb => cb.value);
-
-      const url = id ? `${API_BASE}/roles/${id}` : `${API_BASE}/roles`;
-      const method = id ? 'PUT' : 'POST';
-
-      try {
-        const res = await fetch(url, {
-          method,
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getToken()}` 
-          },
-          body: JSON.stringify({ name, permissions })
-        });
-        if (res.ok) {
-          closeRoleMod();
-          fetchRoles();
-        } else {
-          const errData = await res.json();
-          alert(errData.message || 'Error saving role');
         }
       } catch (err) {
         console.error(err);

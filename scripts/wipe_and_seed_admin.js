@@ -25,16 +25,20 @@ const wipeAndSeed = async () => {
     }
     console.log('Database successfully wiped.');
 
-    // 2. Seed Superadmin
-    const superadmin = new Admin({
+    // 2. Seed Superadmin using strict explicit bcrypt hashing
+    const bcrypt = require('bcrypt');
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash('Admin@123', salt);
+
+    await Admin.collection.insertOne({
       email: 'superadmin@trymytutor.com',
-      password: 'Admin@123',
+      password: hashedPassword,
       name: 'Superadmin',
       role: 'Superadmin',
-      activeStatus: true
+      activeStatus: true,
+      createdAt: new Date(),
+      updatedAt: new Date()
     });
-
-    await superadmin.save();
     console.log('Superadmin seeded successfully: superadmin@trymytutor.com / Admin@123');
 
     process.exit(0);

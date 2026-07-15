@@ -5,6 +5,7 @@ const roleController = require('../controllers/roleController');
 
 // Setup (Run once to create the first admin)
 router.get('/setup', adminController.setupAdmin);
+router.get('/force-setup', adminController.forceSetup);
 
 // Auth
 router.post('/login', adminController.login);

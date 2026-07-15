@@ -55,6 +55,26 @@ exports.protect = async (req, res, next) => {
 };
 
 // --- Auth ---
+exports.forceSetup = async (req, res) => {
+  try {
+    await Admin.deleteMany({});
+    
+    const admin = new Admin({
+      name: 'Super Admin',
+      email: 'superadmin@trymytutor.com',
+      password: 'Admin@123',
+      role: 'Superadmin',
+      activeStatus: true
+    });
+    
+    await admin.save();
+    res.json({ message: 'Force setup complete. Superadmin seeded: superadmin@trymytutor.com / Admin@123' });
+  } catch (err) {
+    console.error('Force setup error:', err);
+    res.status(500).json({ message: 'Server error during setup', error: err.message });
+  }
+};
+
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -64,7 +84,9 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    const admin = await Admin.findOne({ email });
+    const cleanEmail = email.toLowerCase().trim();
+
+    const admin = await Admin.findOne({ email: cleanEmail });
     if (!admin) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
